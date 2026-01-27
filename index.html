@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>q0pe - konfiguracja profilu</title>
+  <meta charset="UTF-8" />
+  <title>q0pe</title>
   <style>
     body {
       margin: 0;
@@ -10,91 +10,42 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #f5f5f5;
+      background: #ffffff;
+      color: #000;
       font-family: Arial, sans-serif;
     }
-
     .box {
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      width: 400px;
       text-align: center;
+      width: 400px;
     }
-
-    h2 {
-      margin-bottom: 20px;
-    }
-
-    .profile-img-container {
-      position: relative;
-      display: inline-block;
-      margin-bottom: 20px;
-    }
-
-    .profile-img-container img {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      cursor: pointer;
-      border: 2px solid #ccc;
-    }
-
     input {
-      padding: 12px;
+      padding: 8px;
       font-size: 16px;
-      border-radius: 12px;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      margin-bottom: 10px;
       width: 100%;
       box-sizing: border-box;
-      margin-bottom: 6px;
     }
-
-    .rules {
-      font-size: 12px;
-      color: #888;
-      margin-bottom: 15px;
-      text-align: left;
-    }
-
     button {
-      margin-top: 15px;
-      padding: 12px 20px;
+      margin-top: 10px;
+      padding: 10px 20px;
       font-size: 16px;
       border: none;
-      border-radius: 12px;
+      border-radius: 8px;
       cursor: pointer;
-      background-color: #0f172a;
-      color: white;
     }
-
-    button:hover {
-      background-color: #1e2a4c;
+    img.profile {
+      width: 100px;
+      border-radius: 50%;
+      margin-bottom: 20px;
     }
-
   </style>
 </head>
 <body>
   <div class="box">
-    <h2>Konfiguracja profilu</h2>
-    <div class="profile-img-container">
-      <img id="profileImg" src="https://via.placeholder.com/120" alt="Profilowe">
-      <input type="file" id="imgInput" style="display:none" accept="image/*">
-    </div>
-
-    <div>
-      <input id="usernameInput" placeholder="Nazwa użytkownika (4-25 znaków, a-z A-Z 0-9 . _)" maxlength="25">
-      <div class="rules" id="usernameRules">Nazwę użytkownika możesz ustawić tylko 1 raz, po tej nazwie inni będą Cię dodawać do znajomych.</div>
-    </div>
-
-    <div>
-      <input id="displayNameInput" placeholder="Wyświetlana nazwa (4-25 znaków, emotki i znaki specjalne dozwolone)" maxlength="25">
-      <div class="rules" id="displayNameRules">Tę nazwę możesz zmienić w ustawieniach kiedy chcesz, będzie widoczna na czacie.</div>
-    </div>
-
-    <button id="saveBtn">Zapisz profil</button>
+    <div class="logo" style="font-size:64px; font-weight:bold;">q0pe</div>
+    <button onclick="login()">Zaloguj się przez Google</button>
   </div>
 
   <script type="module">
@@ -102,6 +53,7 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // Konfiguracja Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
       authDomain: "q0peee.firebaseapp.com",
@@ -114,65 +66,84 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    // Obsługa kliknięcia w zdjęcie profilowe
-    const profileImg = document.getElementById("profileImg");
-    const imgInput = document.getElementById("imgInput");
-    profileImg.onclick = () => imgInput.click();
-    imgInput.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = () => profileImg.src = reader.result;
-        reader.readAsDataURL(file);
-      }
-    };
-
     window.login = () => signInWithPopup(auth, provider).catch(err => console.error(err));
     window.logout = () => signOut(auth);
 
-    function hideRulesOnInput(inputEl, rulesEl) {
-      inputEl.addEventListener("input", () => {
-        if(inputEl.value.length > 0) rulesEl.style.display = "none";
-        else rulesEl.style.display = "block";
-      });
+    async function showProfileSetup(user) {
+      const box = document.querySelector(".box");
+      const userDoc = doc(db, "users", user.uid);
+      const docSnap = await getDoc(userDoc);
+
+      if (!docSnap.exists()) {
+        // Pierwsze logowanie – konfiguracja profilu
+        box.innerHTML = `
+          <img src="${user.photoURL}" class="profile" alt="Profilowe">
+          <div>Ustal swoją nazwę użytkownika (nick, 4-25 znaków, dozwolone: a-z, A-Z, 0-9, . _)</div>
+          <input id="nickInput" placeholder="Twój nick">
+          <div style="font-size:12px; color:#555; margin-bottom:10px;">
+            Nazwę użytkownika możesz ustawić tylko raz, po niej inni użytkownicy będą mogli Cię dodać do znajomych
+          </div>
+          <div>Wyświetlana nazwa (możesz zmieniać w ustawieniach, emotki i znaki specjalne dozwolone)</div>
+          <input id="displayInput" placeholder="Wyświetlana nazwa" value="${user.displayName}">
+          <div style="font-size:12px; color:#555; margin-bottom:10px;">
+            Ta nazwa będzie wyświetlana na czacie
+          </div>
+          <button id="saveBtn">Zapisz</button>
+          <button id="cancelBtn">Anuluj</button>
+        `;
+
+        document.getElementById("saveBtn").onclick = async () => {
+          const nick = document.getElementById("nickInput").value.trim();
+          const displayName = document.getElementById("displayInput").value.trim();
+          if (!/^[a-zA-Z0-9._]{4,25}$/.test(nick)) {
+            alert("Nieprawidłowa nazwa użytkownika. Spróbuj ponownie.");
+            return;
+          }
+          if (displayName.length < 4 || displayName.length > 25) {
+            alert("Nieprawidłowa wyświetlana nazwa. Spróbuj ponownie.");
+            return;
+          }
+          await setDoc(userDoc, {
+            nick,
+            displayName,
+            photoURL: user.photoURL,
+            email: user.email
+          });
+          renderLoggedInScreen(displayName, user.photoURL);
+        };
+
+        document.getElementById("cancelBtn").onclick = () => logout();
+
+      } else {
+        // Użytkownik już skonfigurowany
+        const data = docSnap.data();
+        renderLoggedInScreen(data.displayName, data.photoURL);
+      }
     }
 
-    hideRulesOnInput(document.getElementById("usernameInput"), document.getElementById("usernameRules"));
-    hideRulesOnInput(document.getElementById("displayNameInput"), document.getElementById("displayNameRules"));
+    function renderLoggedInScreen(displayName, photoURL) {
+      const box = document.querySelector(".box");
+      box.innerHTML = `
+        <div style="text-align:center; margin-top:50px;">
+          <img src="${photoURL}" class="profile" alt="Profilowe">
+          <h2>Witaj, ${displayName}!</h2>
+          <button onclick="logout()">Wyloguj się</button>
+        </div>
+      `;
+    }
 
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, user => {
+      const box = document.querySelector(".box");
       if (user) {
-        const userDoc = doc(db, "users", user.uid);
-        const docSnap = await getDoc(userDoc);
-
-        if (!docSnap.exists()) {
-          // Pierwsza konfiguracja profilu
-          document.querySelector(".box").style.display = "block";
-        } else {
-          // Użytkownik już skonfigurowany → testowy ekran
-          document.body.innerHTML = `<h1 style="text-align:center;margin-top:50px;">TEST</h1>`;
-        }
+        showProfileSetup(user);
+      } else {
+        // Widok logowania
+        box.innerHTML = `
+          <div class="logo" style="font-size:64px; font-weight:bold;">q0pe</div>
+          <button onclick="login()">Zaloguj się przez Google</button>
+        `;
       }
     });
-
-    document.getElementById("saveBtn").onclick = async () => {
-      const user = auth.currentUser;
-      if (!user) return alert("Nie jesteś zalogowany!");
-      const nick = document.getElementById("usernameInput").value.trim();
-      const displayName = document.getElementById("displayNameInput").value.trim();
-      const photoURL = profileImg.src;
-
-      if (!/^[a-zA-Z0-9._]{4,25}$/.test(nick)) {
-        return alert("Nieprawidłowa nazwa użytkownika!");
-      }
-      if (displayName.length < 4 || displayName.length > 25) {
-        return alert("Nieprawidłowa wyświetlana nazwa!");
-      }
-
-      await setDoc(doc(db, "users", user.uid), { nick, displayName, photoURL, email: user.email });
-      // Pokaz testowy ekran po zapisaniu
-      document.body.innerHTML = `<h1 style="text-align:center;margin-top:50px;">TEST</h1>`;
-    };
   </script>
 </body>
 </html>
