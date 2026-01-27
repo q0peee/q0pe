@@ -37,8 +37,15 @@
     }
     img.profile {
       width: 100px;
+      height: 100px;
       border-radius: 50%;
       margin-bottom: 20px;
+      object-fit: cover;
+      cursor: pointer;
+      border: 2px dashed #ccc;
+    }
+    input[type="file"] {
+      display: none;
     }
   </style>
 </head>
@@ -52,8 +59,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-    // Konfiguracja Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
       authDomain: "q0peee.firebaseapp.com",
@@ -64,6 +71,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
     const provider = new GoogleAuthProvider();
 
     window.login = () => signInWithPopup(auth, provider).catch(err => console.error(err));
@@ -75,9 +83,10 @@
       const docSnap = await getDoc(userDoc);
 
       if (!docSnap.exists()) {
-        // Pierwsze logowanie – konfiguracja profilu
+        // Nowy użytkownik – konfiguracja profilu
         box.innerHTML = `
-          <img src="${user.photoURL}" class="profile" alt="Profilowe">
+          <img src="${user.photoURL}" id="profilePic" class="profile" alt="Profilowe" title="Kliknij, aby zmienić">
+          <input type="file" id="fileInput" accept="image/*">
           <div>Ustal swoją nazwę użytkownika (nick, 4-25 znaków, dozwolone: a-z, A-Z, 0-9, . _)</div>
           <input id="nickInput" placeholder="Twój nick">
           <div style="font-size:12px; color:#555; margin-bottom:10px;">
@@ -92,6 +101,18 @@
           <button id="cancelBtn">Anuluj</button>
         `;
 
+        const profilePic = document.getElementById("profilePic");
+        const fileInput = document.getElementById("fileInput");
+        let selectedFile = null;
+
+        profilePic.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => {
+          if (e.target.files[0]) {
+            selectedFile = e.target.files[0];
+            profilePic.src = URL.createObjectURL(selectedFile);
+          }
+        };
+
         document.getElementById("saveBtn").onclick = async () => {
           const nick = document.getElementById("nickInput").value.trim();
           const displayName = document.getElementById("displayInput").value.trim();
@@ -103,19 +124,27 @@
             alert("Nieprawidłowa wyświetlana nazwa. Spróbuj ponownie.");
             return;
           }
+
+          let photoURL = user.photoURL;
+          if (selectedFile) {
+            const storageRef = ref(storage, `profilePics/${user.uid}`);
+            await uploadBytes(storageRef, selectedFile);
+            photoURL = await getDownloadURL(storageRef);
+          }
+
           await setDoc(userDoc, {
             nick,
             displayName,
-            photoURL: user.photoURL,
+            photoURL,
             email: user.email
           });
-          renderLoggedInScreen(displayName, user.photoURL);
+
+          renderLoggedInScreen(displayName, photoURL);
         };
 
         document.getElementById("cancelBtn").onclick = () => logout();
 
       } else {
-        // Użytkownik już skonfigurowany
         const data = docSnap.data();
         renderLoggedInScreen(data.displayName, data.photoURL);
       }
@@ -137,7 +166,6 @@
       if (user) {
         showProfileSetup(user);
       } else {
-        // Widok logowania
         box.innerHTML = `
           <div class="logo" style="font-size:64px; font-weight:bold;">q0pe</div>
           <button onclick="login()">Zaloguj się przez Google</button>
