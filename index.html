@@ -16,7 +16,7 @@
     }
     .box {
       text-align: center;
-      width: 300px;
+      width: 350px;
     }
     .logo {
       font-size: 64px;
@@ -44,9 +44,30 @@
       cursor: pointer;
     }
     img.profile {
-      width: 100px;
+      width: 50px;
       border-radius: 50%;
-      margin-bottom: 20px;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    #chatMessages {
+      max-height: 300px;
+      overflow-y: auto;
+      text-align: left;
+      margin-bottom: 10px;
+      border: 1px solid #333;
+      padding: 10px;
+      border-radius: 8px;
+      background: #1e293b;
+    }
+    .message {
+      margin-bottom: 10px;
+    }
+    .message span.nick {
+      font-weight: bold;
+      color: #facc15;
+    }
+    #msgInput {
+      width: calc(100% - 22px);
     }
   </style>
 </head>
@@ -60,7 +81,9 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // Twój Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
       authDomain: "q0peee.firebaseapp.com",
@@ -71,22 +94,20 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
+    const db = getFirestore(app);
 
-    window.login = () => {
-      signInWithPopup(auth, provider).catch(err => {
-        alert("Błąd logowania");
-        console.error(err);
-      });
-    };
+    window.login = () => signInWithPopup(auth, provider).catch(err => console.error(err));
+    window.logout = () => signOut(auth);
 
-    window.logout = () => {
-      signOut(auth);
-    };
-
-    onAuthStateChanged(auth, user => {
+    async function showProfile(user) {
       const box = document.querySelector(".box");
-      if (user) {
-        // Ekran konfiguracji profilu
+      const userDoc = doc(db, "users", user.uid);
+      const docSnap = await getDoc(userDoc);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        renderChat(user, data.nick);
+      } else {
         box.innerHTML = `
           <img src="${user.photoURL}" alt="Profilowe" class="profile">
           <div style="font-size: 18px; margin-bottom:10px;">Witaj, ${user.displayName}! Ustaw swój nick do czatu:</div>
@@ -94,20 +115,57 @@
           <button id="saveProfile">Zatwierdź profil</button>
           <button onclick="logout()" style="margin-top:10px;">Wyloguj się</button>
         `;
-
-        document.getElementById("saveProfile").onclick = () => {
+        document.getElementById("saveProfile").onclick = async () => {
           const nick = document.getElementById("nickname").value || user.displayName;
-          // Mini-aplikacja/czat w tym samym boxie
-          box.innerHTML = `
-            <h2>Witaj w czacie, ${nick}!</h2>
-            <img src="${user.photoURL}" alt="Profilowe" class="profile">
-            <p>Tu będzie Twój czat :)</p>
-            <button onclick="logout()">Wyloguj się</button>
-          `;
+          await setDoc(userDoc, { nick, photoURL: user.photoURL, email: user.email });
+          renderChat(user, nick);
         };
-      } else {
-        // Ekran logowania
-        box.innerHTML = `
+      }
+    }
+
+    function renderChat(user, nick) {
+      const box = document.querySelector(".box");
+      box.innerHTML = `
+        <h2>Witaj w czacie, ${nick}!</h2>
+        <div id="chatMessages"></div>
+        <input type="text" id="msgInput" placeholder="Napisz wiadomość...">
+        <button id="sendMsg">Wyślij</button>
+        <button onclick="logout()" style="margin-top:10px;">Wyloguj się</button>
+      `;
+
+      const chatRef = collection(db, "messages");
+      const q = query(chatRef, orderBy("timestamp"));
+      const chatDiv = document.getElementById("chatMessages");
+
+      onSnapshot(q, snapshot => {
+        chatDiv.innerHTML = "";
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          const msgEl = document.createElement("div");
+          msgEl.className = "message";
+          msgEl.innerHTML = `<img src="${msg.photoURL}" class="profile"><span class="nick">${msg.nick}:</span> ${msg.text}`;
+          chatDiv.appendChild(msgEl);
+          chatDiv.scrollTop = chatDiv.scrollHeight;
+        });
+      });
+
+      document.getElementById("sendMsg").onclick = async () => {
+        const input = document.getElementById("msgInput");
+        if (input.value.trim() === "") return;
+        await addDoc(chatRef, {
+          text: input.value,
+          nick,
+          photoURL: user.photoURL,
+          timestamp: new Date()
+        });
+        input.value = "";
+      };
+    }
+
+    onAuthStateChanged(auth, user => {
+      if (user) showProfile(user);
+      else {
+        document.querySelector(".box").innerHTML = `
           <div class="logo">q0pe</div>
           <div class="tagline">prosty czat. zero spamu.</div>
           <button onclick="login()">Zaloguj się przez Google</button>
