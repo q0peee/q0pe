@@ -1,223 +1,192 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <title>q0pe</title>
+<meta charset="UTF-8">
+<title>q0pe</title>
 
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: Arial, sans-serif;
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+}
 
-      /* 🔹 TŁO */
-      background:
-        radial-gradient(circle at top left, #f5f7fa, transparent 40%),
-        radial-gradient(circle at bottom right, #e4e9f2, transparent 40%),
-        linear-gradient(135deg, #f0f2f5, #e6e9ef);
-    }
+.box {
+  background: white;
+  width: 380px;
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.12);
+  text-align: center;
+}
 
-    .box {
-      background: #ffffff;
-      width: 380px;
-      padding: 40px 32px;
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-      text-align: center;
-    }
+.logo {
+  font-size: 48px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
 
-    .logo {
-      font-size: 48px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      color: #111;
-    }
+.profile-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
 
-    input {
-      width: 100%;
-      padding: 14px;
-      margin-top: 8px;
-      margin-bottom: 10px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-      box-sizing: border-box;
-      outline: none;
-      transition: border 0.2s, box-shadow 0.2s;
-    }
+.profile {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px dashed #cbd5e1;
+  cursor: pointer;
+}
 
-    input:focus {
-      border-color: #6b7cff;
-      box-shadow: 0 0 0 2px rgba(107,124,255,0.2);
-    }
+input {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
 
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 12px;
-      border-radius: 12px;
-      border: none;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      background: linear-gradient(135deg, #6b7cff, #7f53ff);
-      color: white;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
+button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  background: linear-gradient(135deg,#6366f1,#8b5cf6);
+  color: white;
+}
 
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    }
+button.secondary {
+  background: #e5e7eb;
+  color: #111;
+}
 
-    button.secondary {
-      background: #e5e7eb;
-      color: #111;
-    }
-
-    .small {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 12px;
-    }
-
-    img.profile {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      object-fit: cover;
-      cursor: pointer;
-      margin-bottom: 18px;
-      border: 3px dashed #c7c7c7;
-      transition: border 0.2s;
-    }
-
-    img.profile:hover {
-      border-color: #6b7cff;
-    }
-  </style>
+.small {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+</style>
 </head>
 
 <body>
-  <div class="box" id="box">
-    <div class="logo">q0pe</div>
-    <button onclick="login()">Zaloguj się przez Google</button>
-  </div>
+<div class="box" id="box">
+  <div class="logo">q0pe</div>
+  <button onclick="login()">Zaloguj się przez Google</button>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
-      authDomain: "q0peee.firebaseapp.com",
-      projectId: "q0peee",
-      appId: "1:172139799914:web:ffc02c6c3b49a3fb57b113"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
+  authDomain: "q0peee.firebaseapp.com",
+  projectId: "q0peee",
+  appId: "1:172139799914:web:ffc02c6c3b49a3fb57b113"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-    const provider = new GoogleAuthProvider();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const provider = new GoogleAuthProvider();
+const box = document.getElementById("box");
 
-    const box = document.getElementById("box");
+window.login = () => signInWithPopup(auth, provider);
+window.logout = () => signOut(auth);
 
-    window.login = () => signInWithPopup(auth, provider);
-    window.logout = () => signOut(auth);
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    box.innerHTML = `
+      <div class="logo">q0pe</div>
+      <button onclick="login()">Zaloguj się przez Google</button>
+    `;
+    return;
+  }
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
-        box.innerHTML = `
-          <div class="logo">q0pe</div>
-          <button onclick="login()">Zaloguj się przez Google</button>
-        `;
-        return;
-      }
+  const refDoc = doc(db, "users", user.uid);
+  const snap = await getDoc(refDoc);
 
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
+  if (!snap.exists()) setupProfile(user, refDoc);
+  else showApp(snap.data());
+});
 
-      if (!snap.exists()) {
-        showProfileSetup(user, userRef);
-      } else {
-        const data = snap.data();
-        showLogged(data.displayName, data.photoURL);
-      }
+function setupProfile(user, refDoc) {
+  box.innerHTML = `
+    <div class="profile-wrapper">
+      <img src="${user.photoURL}" class="profile" id="avatar">
+    </div>
+    <input type="file" id="file" accept="image/*" hidden>
+
+    <input id="nick" placeholder="Nazwa użytkownika">
+    <div class="small">Jednorazowa • 4–25 • a-z A-Z 0-9 . _</div>
+
+    <input id="display" value="${user.displayName}">
+    <div class="small">Wyświetlana nazwa (można zmienić)</div>
+
+    <button id="save">Zapisz</button>
+    <button class="secondary" onclick="logout()">Anuluj</button>
+  `;
+
+  const avatar = document.getElementById("avatar");
+  const file = document.getElementById("file");
+  let imgFile = null;
+
+  avatar.onclick = () => file.click();
+  file.onchange = e => {
+    imgFile = e.target.files[0];
+    avatar.src = URL.createObjectURL(imgFile);
+  };
+
+  document.getElementById("save").onclick = async () => {
+    const nick = nick.value.trim();
+    const display = display.value.trim();
+    if (!/^[a-zA-Z0-9._]{4,25}$/.test(nick)) {
+      alert("Zła nazwa użytkownika");
+      return;
+    }
+
+    let photoURL = user.photoURL;
+    if (imgFile) {
+      const imgRef = ref(storage, "avatars/" + user.uid);
+      await uploadBytes(imgRef, imgFile);
+      photoURL = await getDownloadURL(imgRef);
+    }
+
+    await setDoc(refDoc, {
+      nick,
+      displayName: display,
+      photoURL,
+      email: user.email
     });
 
-    function showProfileSetup(user, userRef) {
-      box.innerHTML = `
-        <img src="${user.photoURL}" class="profile" id="profilePic">
-        <input type="file" id="fileInput" accept="image/*" style="display:none">
+    showApp({ displayName: display, photoURL });
+  };
+}
 
-        <b>Nazwa użytkownika</b>
-        <input id="nick" placeholder="4–25 znaków a-z A-Z 0-9 . _">
-        <div class="small">
-          Nazwa jednorazowa – po niej inni będą mogli Cię dodać
-        </div>
-
-        <b>Wyświetlana nazwa</b>
-        <input id="display" value="${user.displayName}">
-        <div class="small">
-          Ta nazwa będzie widoczna na czacie
-        </div>
-
-        <button id="save">Zapisz</button>
-        <button class="secondary" onclick="logout()">Anuluj</button>
-      `;
-
-      const pic = document.getElementById("profilePic");
-      const file = document.getElementById("fileInput");
-      let selectedFile = null;
-
-      pic.onclick = () => file.click();
-      file.onchange = e => {
-        selectedFile = e.target.files[0];
-        if (selectedFile) {
-          pic.src = URL.createObjectURL(selectedFile);
-        }
-      };
-
-      document.getElementById("save").onclick = async () => {
-        const nick = document.getElementById("nick").value.trim();
-        const display = document.getElementById("display").value.trim();
-
-        if (!/^[a-zA-Z0-9._]{4,25}$/.test(nick)) {
-          alert("Nieprawidłowa nazwa użytkownika");
-          return;
-        }
-
-        let photoURL = user.photoURL;
-        if (selectedFile) {
-          const imgRef = ref(storage, "avatars/" + user.uid);
-          await uploadBytes(imgRef, selectedFile);
-          photoURL = await getDownloadURL(imgRef);
-        }
-
-        await setDoc(userRef, {
-          nick,
-          displayName: display,
-          photoURL,
-          email: user.email
-        });
-
-        showLogged(display, photoURL);
-      };
-    }
-
-    function showLogged(name, photo) {
-      box.innerHTML = `
-        <img src="${photo}" class="profile">
-        <h2>Witaj, ${name}!</h2>
-        <button onclick="logout()">Wyloguj się</button>
-      `;
-    }
-  </script>
+function showApp(data) {
+  box.innerHTML = `
+    <div class="profile-wrapper">
+      <img src="${data.photoURL}" class="profile">
+    </div>
+    <h2>Witaj, ${data.displayName}</h2>
+    <button onclick="logout()">Wyloguj się</button>
+  `;
+}
+</script>
 </body>
 </html>
