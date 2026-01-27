@@ -83,7 +83,6 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Twój Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
       authDomain: "q0peee.firebaseapp.com",
@@ -106,8 +105,10 @@
 
       if (docSnap.exists()) {
         const data = docSnap.data();
+        // Jeśli dokument istnieje, używamy zapisanych danych
         renderChat(user, data.nick);
       } else {
+        // Jeśli nie istnieje, ustaw nick i zapisujemy go
         box.innerHTML = `
           <img src="${user.photoURL}" alt="Profilowe" class="profile">
           <div style="font-size: 18px; margin-bottom:10px;">Witaj, ${user.displayName}! Ustaw swój nick do czatu:</div>
