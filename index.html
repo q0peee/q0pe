@@ -10,27 +10,19 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #0f172a;
-      color: white;
+      background: #ffffff;
+      color: #000;
       font-family: Arial, sans-serif;
     }
     .box {
       text-align: center;
-      width: 350px;
-    }
-    .logo {
-      font-size: 64px;
-      font-weight: bold;
-    }
-    .tagline {
-      margin-top: 10px;
-      color: #94a3b8;
+      width: 400px;
     }
     input {
       padding: 8px;
       font-size: 16px;
       border-radius: 5px;
-      border: none;
+      border: 1px solid #ccc;
       margin-bottom: 10px;
       width: 100%;
       box-sizing: border-box;
@@ -44,44 +36,22 @@
       cursor: pointer;
     }
     img.profile {
-      width: 50px;
+      width: 100px;
       border-radius: 50%;
-      margin-right: 10px;
-      vertical-align: middle;
-    }
-    #chatMessages {
-      max-height: 300px;
-      overflow-y: auto;
-      text-align: left;
-      margin-bottom: 10px;
-      border: 1px solid #333;
-      padding: 10px;
-      border-radius: 8px;
-      background: #1e293b;
-    }
-    .message {
-      margin-bottom: 10px;
-    }
-    .message span.nick {
-      font-weight: bold;
-      color: #facc15;
-    }
-    #msgInput {
-      width: calc(100% - 22px);
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
   <div class="box">
-    <div class="logo">q0pe</div>
-    <div class="tagline">prosty czat. zero spamu.</div>
+    <div class="logo" style="font-size:64px; font-weight:bold;">q0pe</div>
     <button onclick="login()">Zaloguj się przez Google</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
@@ -92,83 +62,55 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
     window.login = () => signInWithPopup(auth, provider).catch(err => console.error(err));
     window.logout = () => signOut(auth);
 
-    async function showProfile(user) {
+    async function showProfileSetup(user) {
       const box = document.querySelector(".box");
       const userDoc = doc(db, "users", user.uid);
       const docSnap = await getDoc(userDoc);
 
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        // Jeśli dokument istnieje, używamy zapisanych danych
-        renderChat(user, data.nick);
-      } else {
-        // Jeśli nie istnieje, ustaw nick i zapisujemy go
+      if (!docSnap.exists()) {
+        // Pierwszy raz użytkownik – konfiguracja profilu
         box.innerHTML = `
-          <img src="${user.photoURL}" alt="Profilowe" class="profile">
-          <div style="font-size: 18px; margin-bottom:10px;">Witaj, ${user.displayName}! Ustaw swój nick do czatu:</div>
-          <input id="nickname" placeholder="Twój nick" value="${user.displayName}">
-          <button id="saveProfile">Zatwierdź profil</button>
-          <button onclick="logout()" style="margin-top:10px;">Wyloguj się</button>
+          <img src="${user.photoURL}" class="profile" alt="Profilowe">
+          <div>Ustal swoją nazwę użytkownika (nick, min 4, max 25 znaków, dozwolone a-z, A-Z, 0-9, . i _):</div>
+          <input id="nickInput" placeholder="Twój nick">
+          <button id="saveBtn">Zapisz</button>
+          <button id="cancelBtn">Anuluj</button>
         `;
-        document.getElementById("saveProfile").onclick = async () => {
-          const nick = document.getElementById("nickname").value || user.displayName;
+        document.getElementById("saveBtn").onclick = async () => {
+          const nick = document.getElementById("nickInput").value.trim();
+          if (!/^[a-zA-Z0-9._]{4,25}$/.test(nick)) {
+            alert("Nieprawidłowa nazwa. Spróbuj ponownie.");
+            return;
+          }
           await setDoc(userDoc, { nick, photoURL: user.photoURL, email: user.email });
-          renderChat(user, nick);
+          renderTestScreen();
         };
+        document.getElementById("cancelBtn").onclick = () => logout();
+      } else {
+        // Użytkownik już wcześniej skonfigurowany
+        renderTestScreen();
       }
     }
 
-    function renderChat(user, nick) {
+    function renderTestScreen() {
       const box = document.querySelector(".box");
-      box.innerHTML = `
-        <h2>Witaj w czacie, ${nick}!</h2>
-        <div id="chatMessages"></div>
-        <input type="text" id="msgInput" placeholder="Napisz wiadomość...">
-        <button id="sendMsg">Wyślij</button>
-        <button onclick="logout()" style="margin-top:10px;">Wyloguj się</button>
-      `;
-
-      const chatRef = collection(db, "messages");
-      const q = query(chatRef, orderBy("timestamp"));
-      const chatDiv = document.getElementById("chatMessages");
-
-      onSnapshot(q, snapshot => {
-        chatDiv.innerHTML = "";
-        snapshot.forEach(doc => {
-          const msg = doc.data();
-          const msgEl = document.createElement("div");
-          msgEl.className = "message";
-          msgEl.innerHTML = `<img src="${msg.photoURL}" class="profile"><span class="nick">${msg.nick}:</span> ${msg.text}`;
-          chatDiv.appendChild(msgEl);
-          chatDiv.scrollTop = chatDiv.scrollHeight;
-        });
-      });
-
-      document.getElementById("sendMsg").onclick = async () => {
-        const input = document.getElementById("msgInput");
-        if (input.value.trim() === "") return;
-        await addDoc(chatRef, {
-          text: input.value,
-          nick,
-          photoURL: user.photoURL,
-          timestamp: new Date()
-        });
-        input.value = "";
-      };
+      box.innerHTML = `<h1>TEST</h1>`;
     }
 
     onAuthStateChanged(auth, user => {
-      if (user) showProfile(user);
-      else {
-        document.querySelector(".box").innerHTML = `
-          <div class="logo">q0pe</div>
-          <div class="tagline">prosty czat. zero spamu.</div>
+      const box = document.querySelector(".box");
+      if (user) {
+        showProfileSetup(user);
+      } else {
+        // Widok logowania
+        box.innerHTML = `
+          <div class="logo" style="font-size:64px; font-weight:bold;">q0pe</div>
           <button onclick="login()">Zaloguj się przez Google</button>
         `;
       }
