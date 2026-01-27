@@ -10,41 +10,84 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #ffffff;
-      color: #000;
       font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
     }
+
     .box {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 40px 30px;
+      width: 350px;
       text-align: center;
-      width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
     }
-    input {
-      padding: 8px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
-      width: 100%;
-      box-sizing: border-box;
+
+    .box:hover {
+      transform: translateY(-3px);
     }
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    img.profile {
-      width: 100px;
-      border-radius: 50%;
+
+    .logo {
+      font-size: 48px;
+      font-weight: bold;
+      color: #333;
       margin-bottom: 20px;
     }
+
+    input {
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      width: 100%;
+      box-sizing: border-box;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input:focus {
+      border-color: #667eea;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      background-color: #667eea;
+      color: #fff;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #5a67d8;
+    }
+
+    img.profile {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+      object-fit: cover;
+    }
+
+    .small-text {
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
   </style>
 </head>
 <body>
   <div class="box">
-    <div class="logo" style="font-size:64px; font-weight:bold;">q0pe</div>
+    <div class="logo">q0pe</div>
     <button onclick="login()">Zaloguj się przez Google</button>
   </div>
 
@@ -53,7 +96,6 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Konfiguracja Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
       authDomain: "q0peee.firebaseapp.com",
@@ -75,17 +117,16 @@
       const docSnap = await getDoc(userDoc);
 
       if (!docSnap.exists()) {
-        // Pierwsze logowanie – konfiguracja profilu
         box.innerHTML = `
           <img src="${user.photoURL}" class="profile" alt="Profilowe">
-          <div>Ustal swoją nazwę użytkownika (nick, 4-25 znaków, dozwolone: a-z, A-Z, 0-9, . _)</div>
+          <div>Ustal swoją nazwę użytkownika (nick, 4-25 znaków, a-z, A-Z, 0-9, . _)</div>
           <input id="nickInput" placeholder="Twój nick">
-          <div style="font-size:12px; color:#555; margin-bottom:10px;">
+          <div class="small-text">
             Nazwę użytkownika możesz ustawić tylko raz, po niej inni użytkownicy będą mogli Cię dodać do znajomych
           </div>
           <div>Wyświetlana nazwa (możesz zmieniać w ustawieniach, emotki i znaki specjalne dozwolone)</div>
           <input id="displayInput" placeholder="Wyświetlana nazwa" value="${user.displayName}">
-          <div style="font-size:12px; color:#555; margin-bottom:10px;">
+          <div class="small-text">
             Ta nazwa będzie wyświetlana na czacie
           </div>
           <button id="saveBtn">Zapisz</button>
@@ -113,9 +154,7 @@
         };
 
         document.getElementById("cancelBtn").onclick = () => logout();
-
       } else {
-        // Użytkownik już skonfigurowany
         const data = docSnap.data();
         renderLoggedInScreen(data.displayName, data.photoURL);
       }
@@ -124,7 +163,7 @@
     function renderLoggedInScreen(displayName, photoURL) {
       const box = document.querySelector(".box");
       box.innerHTML = `
-        <div style="text-align:center; margin-top:50px;">
+        <div style="text-align:center; margin-top:20px;">
           <img src="${photoURL}" class="profile" alt="Profilowe">
           <h2>Witaj, ${displayName}!</h2>
           <button onclick="logout()">Wyloguj się</button>
@@ -137,9 +176,8 @@
       if (user) {
         showProfileSetup(user);
       } else {
-        // Widok logowania
         box.innerHTML = `
-          <div class="logo" style="font-size:64px; font-weight:bold;">q0pe</div>
+          <div class="logo">q0pe</div>
           <button onclick="login()">Zaloguj się przez Google</button>
         `;
       }
