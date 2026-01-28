@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <title>q0pe</title>
 
-  <!-- Google Fonts: Nunito -->
+  <!-- Google Fonts: Geologica dla logo i Nunito dla przycisków -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100;400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -29,7 +29,7 @@
       height: 100%;
       background: radial-gradient(circle at 50% 50%, #ffffff, #656466);
       transition: background 0.2s;
-      z-index: -1; /* za wszystkim */
+      z-index: -1;
     }
 
     /* kontener całości */
@@ -44,9 +44,15 @@
     .logo-outside {
       font-size: 64px;
       font-weight: bold;
-      color: white;
-      margin-bottom: 40px; /* większy odstęp od boxa */
+      color: rgb(39, 39, 39);
+      margin-bottom: 40px;
       letter-spacing: 2px;
+    }
+
+    /* logo w Geologica */
+    .geologica-logo {
+      font-family: 'Geologica', sans-serif;
+      font-weight: 700; /* wybierz wagę 100–900 */
     }
 
     .box {
@@ -76,7 +82,7 @@
       border-radius: 12px;
       border: none;
       font-size: 16px;
-      font-weight: 700; /* bold */
+      font-weight: 700;
       font-family: 'Nunito', sans-serif; /* tylko przycisk Nunito */
       cursor: pointer;
       background: #00d440;
@@ -111,7 +117,7 @@
   <div class="background"></div>
 
   <div class="center">
-    <div class="logo-outside">q0pe</div>
+    <div class="logo-outside geologica-logo">q0pe</div>
 
     <div class="box" id="box">
       <button onclick="login()">Zaloguj się przez Google</button>
