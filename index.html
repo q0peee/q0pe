@@ -13,14 +13,13 @@
     body {
       margin: 0;
       height: 100vh;
-      font-family: Arial, sans-serif; /* cała strona Arial */
+      font-family: Arial, sans-serif;
       overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    /* tło gradientowe reagujące na mysz */
     .background {
       position: fixed;
       top: 0;
@@ -32,7 +31,6 @@
       z-index: -1;
     }
 
-    /* kontener całości */
     .center {
       display: flex;
       flex-direction: column;
@@ -40,19 +38,22 @@
       text-align: center;
     }
 
-    /* logo POZA boxem */
+    /* logo ciemnoszare, interaktywne */
     .logo-outside {
       font-size: 64px;
       font-weight: bold;
-      color: rgb(39, 39, 39);
+      color: #333333; /* ciemnoszary */
       margin-bottom: 40px;
       letter-spacing: 2px;
+      cursor: default;
+      user-select: none;
     }
 
-    /* logo w Geologica */
-    .geologica-logo {
+    .logo-outside span {
+      display: inline-block;
+      transition: transform 0.1s ease-out; /* szybki powrót */
       font-family: 'Geologica', sans-serif;
-      font-weight: 700; /* wybierz wagę 100–900 */
+      font-weight: 700;
     }
 
     .box {
@@ -74,7 +75,6 @@
       box-sizing: border-box;
     }
 
-    /* PRZYCISK LOGOWANIA */
     button {
       width: 100%;
       padding: 12px;
@@ -83,10 +83,10 @@
       border: none;
       font-size: 16px;
       font-weight: 700;
-      font-family: 'Nunito', sans-serif; /* tylko przycisk Nunito */
+      font-family: 'Nunito', sans-serif;
       cursor: pointer;
       background: #00d440;
-      color: rgb(0, 0, 0);
+      color: rgb(0,0,0);
     }
 
     button:hover {
@@ -113,23 +113,23 @@
 </head>
 
 <body>
-  <!-- gradientowe tło -->
   <div class="background"></div>
 
   <div class="center">
-    <div class="logo-outside geologica-logo">q0pe</div>
+    <div class="logo-outside" id="logo">
+      <span>q</span><span>0</span><span>p</span><span>e</span>
+    </div>
 
     <div class="box" id="box">
       <button onclick="login()">Zaloguj się przez Google</button>
     </div>
   </div>
 
-  <!-- JS BEZ ZMIAN -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
@@ -145,7 +145,6 @@
     const provider = new GoogleAuthProvider();
 
     const box = document.getElementById("box");
-
     window.login = () => signInWithPopup(auth, provider);
     window.logout = () => signOut(auth);
 
@@ -170,19 +169,15 @@
       box.innerHTML = `
         <img src="${user.photoURL}" class="profile" id="profilePic">
         <input type="file" id="fileInput" accept="image/*" style="display:none">
-
         <div><b>Nazwa użytkownika</b></div>
         <input id="nick">
         <div id="nickStatus" class="small"></div>
-
         <div><b>Wyświetlana nazwa</b></div>
         <input id="display" value="${user.displayName}">
         <div class="small">Możesz ją zmienić później</div>
-
         <button id="save">Zapisz</button>
         <button onclick="logout()" style="background:#ccc;color:#000">Anuluj</button>
       `;
-
       const pic = document.getElementById("profilePic");
       const file = document.getElementById("fileInput");
       pic.onclick = () => file.click();
@@ -197,13 +192,38 @@
     }
   </script>
 
-  <!-- JS gradient śledzący mysz -->
   <script>
     const bg = document.querySelector('.background');
     document.addEventListener('mousemove', e => {
       const x = e.clientX / window.innerWidth;
       const y = e.clientY / window.innerHeight;
       bg.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, #ffffff, #656466)`;
+    });
+
+    // INTERAKTYWNE LOGO: każda litera osobno reaguje
+    const logo = document.getElementById('logo');
+    const letters = logo.querySelectorAll('span');
+
+    logo.addEventListener('mousemove', e => {
+      letters.forEach(span => {
+        const rect = span.getBoundingClientRect();
+        const letterCenterX = rect.left + rect.width/2;
+        const letterCenterY = rect.top + rect.height/2;
+
+        // wektor od kursora do środka litery
+        const dx = letterCenterX - e.clientX;
+        const dy = letterCenterY - e.clientY;
+
+        // przesunięcie w px, zmniejsz skalę dla subtelnego efektu
+        const offsetX = Math.max(Math.min(dx / 15, 5), -5);
+        const offsetY = Math.max(Math.min(dy / 15, 5), -5);
+
+        span.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      });
+    });
+
+    logo.addEventListener('mouseleave', () => {
+      letters.forEach(span => span.style.transform = 'translate(0,0)');
     });
   </script>
 </body>
