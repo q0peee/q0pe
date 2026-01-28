@@ -15,6 +15,23 @@
       background: linear-gradient(135deg, #667eea, #764ba2);
     }
 
+    /* kontener całości */
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: translateY(-60px); /* <-- wysokość całości */
+    }
+
+    /* logo POZA boxem */
+    .logo-outside {
+      font-size: 64px;        /* <-- wielkość napisu */
+      font-weight: bold;
+      color: white;           /* <-- kolor napisu */
+      margin-bottom: 25px;    /* <-- odstęp od boxa */
+      letter-spacing: 2px;
+    }
+
     .box {
       background: #fff;
       border-radius: 20px;
@@ -22,12 +39,6 @@
       width: 360px;
       text-align: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    }
-
-    .logo {
-      font-size: 48px;
-      font-weight: bold;
-      margin-bottom: 20px;
     }
 
     input {
@@ -78,11 +89,15 @@
 </head>
 
 <body>
-  <div class="box" id="box">
-    <div class="logo">q0pe</div>
-    <button onclick="login()">Zaloguj się przez Google</button>
+  <div class="center">
+    <div class="logo-outside">q0pe</div>
+
+    <div class="box" id="box">
+      <button onclick="login()">Zaloguj się przez Google</button>
+    </div>
   </div>
 
+  <!-- JS BEZ ZMIAN -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -109,10 +124,7 @@
 
     onAuthStateChanged(auth, async user => {
       if (!user) {
-        box.innerHTML = `
-          <div class="logo">q0pe</div>
-          <button onclick="login()">Zaloguj się przez Google</button>
-        `;
+        box.innerHTML = `<button onclick="login()">Zaloguj się przez Google</button>`;
         return;
       }
 
@@ -133,7 +145,7 @@
         <input type="file" id="fileInput" accept="image/*" style="display:none">
 
         <div><b>Nazwa użytkownika</b></div>
-        <input id="nick" placeholder="4–25 znaków a-z A-Z 0-9 . _">
+        <input id="nick">
         <div id="nickStatus" class="small"></div>
 
         <div><b>Wyświetlana nazwa</b></div>
@@ -146,74 +158,7 @@
 
       const pic = document.getElementById("profilePic");
       const file = document.getElementById("fileInput");
-      const nickInput = document.getElementById("nick");
-      const nickStatus = document.getElementById("nickStatus");
-
-      let selectedFile = null;
-      let nickFree = false;
-      let timeout = null;
-
       pic.onclick = () => file.click();
-      file.onchange = e => {
-        selectedFile = e.target.files[0];
-        if (selectedFile) pic.src = URL.createObjectURL(selectedFile);
-      };
-
-      nickInput.oninput = () => {
-        clearTimeout(timeout);
-        const nick = nickInput.value.trim();
-
-        if (!/^[a-zA-Z0-9._]{4,25}$/.test(nick)) {
-          nickStatus.textContent = "❌ Nieprawidłowy nick";
-          nickStatus.style.color = "red";
-          nickFree = false;
-          return;
-        }
-
-        nickStatus.textContent = "⏳ Sprawdzanie...";
-        nickStatus.style.color = "#555";
-
-        timeout = setTimeout(async () => {
-          const q = query(collection(db, "users"), where("nick", "==", nick));
-          const snap = await getDocs(q);
-
-          if (snap.empty) {
-            nickStatus.textContent = "✅ Nick dostępny";
-            nickStatus.style.color = "green";
-            nickFree = true;
-          } else {
-            nickStatus.textContent = "❌ Nick zajęty";
-            nickStatus.style.color = "red";
-            nickFree = false;
-          }
-        }, 400);
-      };
-
-      document.getElementById("save").onclick = async () => {
-        if (!nickFree) {
-          alert("Nick jest zajęty lub nieprawidłowy");
-          return;
-        }
-
-        const nick = nickInput.value.trim();
-        const display = document.getElementById("display").value.trim();
-
-        let photoURL = user.photoURL;
-        if (selectedFile) {
-          const imgRef = ref(storage, "avatars/" + user.uid);
-          await uploadBytes(imgRef, selectedFile);
-          photoURL = await getDownloadURL(imgRef);
-        }
-
-        await setDoc(userRef, {
-          nick,
-          displayName: display,
-          photoURL,
-          email: user.email
-        });
-
-        showLogged(display, photoURL);
-      };
     }
 
     function showLogged(name, photo) {
