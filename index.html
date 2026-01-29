@@ -31,11 +31,10 @@
       height: 100%;
     }
 
-    /* logo ciemnoszare, interaktywne */
     .logo {
       font-family: 'Geologica', sans-serif;
       font-size: 72px;
-      margin-bottom: 50px; /* kontroluje odstęp logo-przycisk */
+      margin-bottom: 50px;
       display: inline-flex;
       cursor: default;
       user-select: none;
@@ -56,8 +55,8 @@
       cursor: pointer;
       background: #00d440;
       transition: background 0.2s;
-      margin-top: 0; /* kontrolowane przez logo margin-bottom */
-      white-space: nowrap; /* tekst w jednej linii */
+      margin-top: 0;
+      white-space: nowrap;
     }
 
     button:hover {
@@ -94,14 +93,16 @@
     const loginBtn = document.getElementById("loginBtn");
     loginBtn.onclick = () => signInWithPopup(auth, provider);
 
+    // Po zalogowaniu użytkownika
     onAuthStateChanged(auth, async user => {
       if (!user) return;
       const ref = doc(db, "users", user.uid);
       const snap = await getDoc(ref);
+
       if (snap.exists()) {
-        window.location.href = "app.html";
+        window.location.href = "app.html"; // istniejące konto
       } else {
-        window.location.href = "signup.html";
+        window.location.href = "signup.html"; // nowe konto
       }
     });
 
@@ -112,13 +113,13 @@
       document.body.style.background = `radial-gradient(circle at ${x}% ${y}%, #ffffff, #656466)`;
     });
 
-    // efekt uciekających liter tylko gdy mysz blisko logo
+    // efekt uciekających liter (tylko blisko logo)
     const logo = document.getElementById("logo");
     const letters = logo.querySelectorAll("span");
 
     document.addEventListener("mousemove", e => {
       const rect = logo.getBoundingClientRect();
-      const padding = 100; // strefa wokół logo w px
+      const padding = 100;
       const withinX = e.clientX >= rect.left - padding && e.clientX <= rect.right + padding;
       const withinY = e.clientY >= rect.top - padding && e.clientY <= rect.bottom + padding;
 
@@ -129,7 +130,7 @@
           const cy = spanRect.top + spanRect.height/2;
           const dx = cx - e.clientX;
           const dy = cy - e.clientY;
-          const offsetX = Math.max(Math.min(dx / 25, 3), -3); // mniejsze przesunięcie
+          const offsetX = Math.max(Math.min(dx / 25, 3), -3);
           const offsetY = Math.max(Math.min(dy / 25, 3), -3);
           span.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
         });
