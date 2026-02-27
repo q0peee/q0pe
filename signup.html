@@ -9,139 +9,260 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
-    body { margin:0;height:100vh;overflow:hidden;display:flex;justify-content:center;align-items:center;font-family:'Nunito',sans-serif;}
-    .background {position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 50% 50%, #ffffff, #656466);transition:background 0.1s;z-index:-1;}
-    .box {width:380px;background:#fff;border-radius:22px;padding:30px;box-shadow:0 15px 40px rgba(0,0,0,0.25);z-index:2;}
-    .top{text-align:center;margin-bottom:20px;}
-    .profile{width:110px;height:110px;border-radius:50%;object-fit:cover;cursor:pointer;border:3px dashed #ccc;}
-    h2{margin:15px 0 5px;}
-    label{font-weight:700;display:block;margin-top:16px;}
-    input{width:100%;padding:12px;margin-top:6px;border-radius:12px;border:1px solid #ccc;font-size:15px;box-sizing:border-box;}
-    .rules{font-size:12px;color:#999;margin-top:4px;}
-    .rules .fixed{font-weight:700;display:block;margin-top:2px;color:#555;}
-    .buttons{display:flex;gap:10px;margin-top:22px;}
-    button{flex:1;padding:12px;border-radius:12px;border:none;font-weight:700;cursor:pointer;font-size:15px;}
-    .save{background:#00d440;}
-    .cancel{background:#ddd;}
-    .message{font-size:12px;margin-top:4px;min-height:16px;}
-    .message.error{color:red;}
-    .message.success{color:green;}
+   body {
+      margin:0;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-family:'Nunito',sans-serif;
+      background:#eee;
+    }
+
+    .background {
+      position:fixed;
+      inset:0;
+      background:radial-gradient(circle at 50% 50%, #ffffff, #656466);
+      z-index:-1;
+      transition:background .1s;
+    }
+
+    .box {
+      width:380px;
+      background:#fff;
+      border-radius:22px;
+      padding:30px;
+      box-shadow:0 15px 40px rgba(0,0,0,.25);
+    }
+
+    .top {
+      text-align:center;
+      margin-bottom:20px;
+    }
+
+    .profile {
+      width:110px;
+      height:110px;
+      border-radius:50%;
+      object-fit:cover;
+      border:3px dashed #ccc;
+      cursor:pointer;
+    }
+
+    h2 { margin:15px 0 5px; }
+
+    label {
+      font-weight:700;
+      display:block;
+      margin-top:16px;
+    }
+
+    input {
+      width:100%;
+      padding:12px;
+      margin-top:6px;
+      border-radius:12px;
+      border:1px solid #ccc;
+      font-size:15px;
+      box-sizing:border-box;
+    }
+
+    .rules {
+      font-size:12px;
+      color:#999;
+      margin-top:4px;
+    }
+
+    .rules .fixed {
+      display:block;
+      margin-top:2px;
+      font-weight:700;
+      color:#555;
+    }
+
+    .message {
+      font-size:12px;
+      margin-top:4px;
+      min-height:16px;
+    }
+
+    .error { color:red; }
+    .success { color:green; }
+
+    .buttons {
+      display:flex;
+      gap:10px;
+      margin-top:22px;
+    }
+
+    button {
+      flex:1;
+      padding:12px;
+      border-radius:12px;
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+      font-size:15px;
+    }
+
+    .save { background:#00d440; }
+    .cancel { background:#ddd; }
   </style>
 </head>
 
 <body>
-  <div class="background"></div>
+<div class="background"></div>
 
-  <div class="box">
-    <div class="top">
-      <img id="profilePic" class="profile">
-      <input type="file" id="fileInput" accept="image/*,image/gif" hidden>
-      <h2>Utwórz profil</h2>
-    </div>
-
-    <label for="nick">Nazwa użytkownika</label>
-    <input id="nick" placeholder="a-z A-Z 0-9 . _">
-    <div class="rules">(a-z A-Z 0-9 . _ • min 4 • max 25)<span class="fixed">Tej nazwy nie można zmienić</span></div>
-    <div id="nickMessage" class="message"></div>
-
-    <label for="display">Wyświetlana nazwa</label>
-    <input id="display" placeholder="Wpisz swoją wyświetlaną nazwę">
-    <div class="rules">(min 4 • max 25 • dozwolone emotki i znaki)</div>
-    <div id="displayMessage" class="message"></div>
-
-    <div class="buttons">
-      <button class="save" id="saveBtn">Kontynuuj</button>
-      <button class="cancel" id="cancelBtn">Anuluj</button>
-    </div>
+<div class="box">
+  <div class="top">
+    <img id="profilePic" class="profile">
+    <input type="file" id="fileInput" accept="image/*,image/gif" hidden>
+    <h2>Utwórz profil</h2>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+  <label>Nazwa użytkownika</label>
+  <input id="nick" placeholder="Wybież swoją nazwę">
+  <div class="rules">(a-z A-Z 0-9 . _ • min 4 • max 25)
+    <span class="fixed">Tej nazwy nie można zmienić</span>
+  </div>
+  <div id="nickMessage" class="message"></div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
-      authDomain: "q0peee.firebaseapp.com",
-      projectId: "q0peee",
-      appId: "1:172139799914:web:ffc02c6c3b49a3fb57b113"
-    };
+  <label>Wyświetlana nazwa</label>
+  <input id="display" placeholder="Wpisz swoją wyświetlaną nazwę">
+  <div class="rules">(min 4 • max 25 • dowolne znaki)</div>
+  <div id="displayMessage" class="message"></div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+  <div class="buttons">
+    <button class="save" id="saveBtn">Kontynuuj</button>
+    <button class="cancel" id="cancelBtn">Anuluj</button>
+  </div>
+</div>
 
-    let user;
-    let selectedFile = null;
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-    const pic = document.getElementById("profilePic");
-    const file = document.getElementById("fileInput");
-    const nickInput = document.getElementById("nick");
-    const displayInput = document.getElementById("display");
-    const nickMessage = document.getElementById("nickMessage");
-    const displayMessage = document.getElementById("displayMessage");
+  const firebaseConfig = {
+    apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
+    authDomain: "q0peee.firebaseapp.com",
+    projectId: "q0peee",
+    appId: "1:172139799914:web:ffc02c6c3b49a3fb57b113"
+  };
 
-    onAuthStateChanged(auth, u => {
-      if (!u) window.location.href = "index.html";
-      user = u;
-      pic.src = u.photoURL;
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  let user;
+  let selectedFile = null;
+
+  const pic = document.getElementById("profilePic");
+  const file = document.getElementById("fileInput");
+  const nickInput = document.getElementById("nick");
+  const displayInput = document.getElementById("display");
+  const nickMessage = document.getElementById("nickMessage");
+  const displayMessage = document.getElementById("displayMessage");
+
+  onAuthStateChanged(auth, u => {
+    if (!u) location.href = "index.html";
+    user = u;
+    pic.src = u.photoURL || "https://i.imgur.com/0y0y0y0.png";
+  });
+
+  pic.onclick = () => file.click();
+
+  file.onchange = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    if (f.size > 10 * 1024 * 1024) {
+      alert("Max 10 MB");
+      return;
+    }
+    selectedFile = f;
+    const r = new FileReader();
+    r.onload = ev => pic.src = ev.target.result;
+    r.readAsDataURL(f);
+  };
+
+  nickInput.addEventListener("input", async () => {
+    const nick = nickInput.value.trim();
+
+    if (nick === "") {
+      nickMessage.textContent = "Wybierz nazwę";
+      nickMessage.className = "message error";
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9._]{4,25}$/.test(nick)) {
+      nickMessage.textContent = "Nieprawidłowa nazwa";
+      nickMessage.className = "message error";
+      return;
+    }
+
+    const snap = await getDoc(doc(db, "nicks", nick));
+    if (snap.exists()) {
+      nickMessage.textContent = "Nazwa jest już zajęta";
+      nickMessage.className = "message error";
+    } else {
+      nickMessage.textContent = "Nazwa dostępna";
+      nickMessage.className = "message success";
+    }
+  });
+
+  displayInput.addEventListener("input", () => {
+    const v = displayInput.value.trim();
+    if (!v) displayMessage.textContent = "Wpisz swoją wyświetlaną nazwę";
+    else if (v.length < 4) displayMessage.textContent = "Za krótka nazwa";
+    else if (v.length > 25) displayMessage.textContent = "Za długa nazwa";
+    else displayMessage.textContent = "";
+    displayMessage.className = "message error";
+  });
+
+  document.getElementById("cancelBtn").onclick = async () => {
+    await signOut(auth);
+    location.href = "index.html";
+  };
+
+  document.getElementById("saveBtn").onclick = async () => {
+    const nick = nickInput.value.trim();
+    const display = displayInput.value.trim();
+
+    const snap = await getDoc(doc(db, "nicks", nick));
+    if (snap.exists()) {
+      nickMessage.textContent = "Nazwa jest już zajęta";
+      return;
+    }
+
+    let photoURL = user.photoURL;
+    if (selectedFile) {
+      const r = ref(storage, "avatars/" + user.uid);
+      await uploadBytes(r, selectedFile);
+      photoURL = await getDownloadURL(r);
+    }
+
+    await setDoc(doc(db, "nicks", nick), { uid: user.uid });
+    await setDoc(doc(db, "users", user.uid), {
+      nick,
+      displayName: display,
+      photoURL,
+      email: user.email
     });
 
-    pic.onclick = () => file.click();
-    file.onchange = e => {
-      const f = e.target.files[0];
-      if (!f) return;
-      if (f.size > 10 * 1024 * 1024) { alert("Plik jest zbyt duży! Maksymalnie 10 MB."); file.value=""; selectedFile=null; return; }
-      selectedFile = f;
-      const reader = new FileReader();
-      reader.onload = ev => pic.src = ev.target.result;
-      reader.readAsDataURL(f);
-    };
+    location.href = "app.html";
+  };
+</script>
 
-    nickInput.addEventListener("input", async () => {
-      const nick = nickInput.value.trim();
-      if (nick === "") { nickMessage.textContent="Wybierz nazwę"; nickMessage.className="message error"; return; }
-      if (!/^[a-zA-Z0-9._]{4,25}$/.test(nick)) { nickMessage.textContent="Nieprawidłowa nazwa"; nickMessage.className="message error"; return; }
-      const q = query(collection(db,"users"),where("nick","==",nick));
-      const snap = await getDocs(q);
-      if (!snap.empty) { nickMessage.textContent="Nazwa jest już zajęta"; nickMessage.className="message error"; } 
-      else { nickMessage.textContent="Nazwa dostępna"; nickMessage.className="message success"; }
-    });
-
-    displayInput.addEventListener("input", () => {
-      const val = displayInput.value.trim();
-      if (val === "") { displayMessage.textContent="Wpisz swoją wyświetlaną nazwę"; displayMessage.className="message error"; }
-      else if (val.length<4){ displayMessage.textContent="Za krótka nazwa"; displayMessage.className="message error"; }
-      else if(val.length>25){ displayMessage.textContent="Za długa nazwa"; displayMessage.className="message error"; }
-      else{ displayMessage.textContent=""; }
-    });
-
-    document.getElementById("cancelBtn").onclick = async () => { await signOut(auth); window.location.href="index.html"; };
-
-    document.getElementById("saveBtn").onclick = async () => {
-      const nick = nickInput.value.trim();
-      const display = displayInput.value.trim();
-      if (!/^[a-zA-Z0-9._]{4,25}$/.test(nick)){ nickMessage.textContent="Nieprawidłowa nazwa"; nickMessage.className="message error"; return; }
-      const q = query(collection(db,"users"),where("nick","==",nick));
-      const snap = await getDocs(q);
-      if(!snap.empty){ nickMessage.textContent="Nazwa jest już zajęta"; nickMessage.className="message error"; return; }
-      if(display.length<4||display.length>25){ displayMessage.textContent="Wyświetlana nazwa musi mieć 4–25 znaków"; displayMessage.className="message error"; return; }
-      let photoURL=user.photoURL;
-      if(selectedFile){ const r = ref(storage,"avatars/"+user.uid); await uploadBytes(r,selectedFile); photoURL=await getDownloadURL(r); }
-      await setDoc(doc(db,"users",user.uid),{ nick, displayName: display, photoURL, email:user.email });
-      window.location.href="app.html";
-    };
-  </script>
-
-  <script>
-    const bg = document.querySelector('.background');
-    document.addEventListener('mousemove', e => {
-      const x = Math.round((e.clientX / window.innerWidth) * 100);
-      const y = Math.round((e.clientY / window.innerHeight) * 100);
-      bg.style.background = `radial-gradient(circle at ${x}% ${y}%, #ffffff, #656466)`;
-    });
-  </script>
+<script>
+  const bg = document.querySelector('.background');
+  document.addEventListener('mousemove', e => {
+    const x = e.clientX / innerWidth * 100;
+    const y = e.clientY / innerHeight * 100;
+    bg.style.background = `radial-gradient(circle at ${x}% ${y}%, #fff, #656466)`;
+  });
+</script>
 </body>
 </html>
+ 
