@@ -21,9 +21,17 @@ font-family:'Nunito',sans-serif;
 height:60px;
 display:flex;
 align-items:center;
-gap:25px;
-padding:0 25px;
+justify-content:space-between;
+padding:0 30px;
 border-bottom:1px solid #eee;
+}
+
+/* LEFT */
+
+.left{
+display:flex;
+align-items:center;
+gap:20px;
 }
 
 /* LOGO */
@@ -33,40 +41,48 @@ font-family:'Geologica',sans-serif;
 font-size:26px;
 }
 
-/* LINK */
+/* FRIENDS BUTTON */
 
-.link{
+.friends{
 cursor:pointer;
-font-weight:600;
+position:relative;
 }
 
 /* SEARCH */
 
-.search{
+.center{
 flex:1;
+display:flex;
+justify-content:center;
 }
 
 .search input{
-width:100%;
-max-width:300px;
-padding:8px 14px;
+width:300px;
+padding:9px 15px;
 border-radius:20px;
 border:1px solid #ddd;
 outline:none;
 }
 
-/* ICONS */
+/* RIGHT */
 
-.icon{
+.right{
+display:flex;
+align-items:center;
+gap:25px;
+}
+
+/* TEXT BUTTON */
+
+.button{
 cursor:pointer;
-font-size:18px;
 }
 
 /* SETTINGS */
 
 .settings{
-position:relative;
 cursor:pointer;
+position:relative;
 }
 
 /* DROPDOWN */
@@ -74,12 +90,12 @@ cursor:pointer;
 .dropdown{
 position:absolute;
 top:40px;
-right:0;
+left:0;
 background:white;
 border-radius:14px;
 box-shadow:0 8px 25px rgba(0,0,0,0.1);
 padding:8px;
-width:150px;
+width:180px;
 display:none;
 flex-direction:column;
 }
@@ -94,6 +110,21 @@ cursor:pointer;
 background:#f3f3f3;
 }
 
+/* ADD FRIEND INPUT */
+
+.addFriend{
+display:none;
+margin-top:10px;
+}
+
+.addFriend input{
+width:100%;
+padding:8px;
+border-radius:10px;
+border:1px solid #ddd;
+outline:none;
+}
+
 </style>
 </head>
 
@@ -101,19 +132,42 @@ background:#f3f3f3;
 
 <div class="topbar">
 
+<div class="left">
+
 <div class="logo">q0pe</div>
 
-<div class="link">Znajomi</div>
+<div class="friends" id="friendsBtn">
 
+Znajomi
+
+<div class="dropdown" id="friendsMenu">
+
+<div>Moi znajomi</div>
+
+<div id="addFriendBtn">Dodaj znajomego</div>
+
+<div class="addFriend" id="addFriendBox">
+<input placeholder="Wpisz nazwę użytkownika">
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="center">
 <div class="search">
 <input placeholder="Szukaj użytkowników...">
 </div>
+</div>
 
-<div class="icon">🔔</div>
+<div class="right">
 
-<button>1</button>
+<div class="button">Powiadomienia</div>
 
 <div class="settings" id="settingsBtn">
+
 ⚙
 
 <div class="dropdown" id="settingsMenu">
@@ -122,6 +176,8 @@ background:#f3f3f3;
 <div>Opcja 2</div>
 <div>Opcja 3</div>
 <div id="logoutBtn">Wyloguj</div>
+
+</div>
 
 </div>
 
@@ -144,29 +200,51 @@ appId: "1:172139799914:web:ffc02c6c3b49a3fb57b113"
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-/* SPRAWDZANIE LOGINU */
+/* LOGIN CHECK */
 
 onAuthStateChanged(auth,(user)=>{
-
 if(!user){
 window.location.href="index.html";
 }
-
 });
 
-/* DROPDOWN SETTINGS */
+/* SETTINGS MENU */
 
-const btn=document.getElementById("settingsBtn");
-const menu=document.getElementById("settingsMenu");
+const settingsBtn=document.getElementById("settingsBtn");
+const settingsMenu=document.getElementById("settingsMenu");
 
-btn.onclick=()=>{
+settingsBtn.onclick=()=>{
 
-menu.style.display =
-menu.style.display==="flex" ? "none" : "flex";
+settingsMenu.style.display =
+settingsMenu.style.display==="flex" ? "none" : "flex";
 
 };
 
-/* WYLOGUJ */
+/* FRIENDS MENU */
+
+const friendsBtn=document.getElementById("friendsBtn");
+const friendsMenu=document.getElementById("friendsMenu");
+
+friendsBtn.onclick=()=>{
+
+friendsMenu.style.display =
+friendsMenu.style.display==="flex" ? "none" : "flex";
+
+};
+
+/* ADD FRIEND */
+
+const addBtn=document.getElementById("addFriendBtn");
+const addBox=document.getElementById("addFriendBox");
+
+addBtn.onclick=()=>{
+
+addBox.style.display =
+addBox.style.display==="block" ? "none" : "block";
+
+};
+
+/* LOGOUT */
 
 document.getElementById("logoutBtn").onclick=async()=>{
 
