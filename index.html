@@ -1,143 +1,347 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <title>q0pe – login</title>
+<meta charset="UTF-8">
+<title>q0pe – login</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@700&family=Nunito:wght@600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@700&family=Nunito:wght@600&display=swap" rel="stylesheet">
 
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Nunito', sans-serif;
-      background: radial-gradient(circle at 50% 50%, #ffffff, #656466);
-      transition: background 0.1s;
-    }
+<style>
 
-    .center {
-      text-align: center;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-    }
+body{
+margin:0;
+height:100vh;
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+font-family:'Nunito',sans-serif;
+background:radial-gradient(circle at 50% 50%, #ffffff, #656466);
+transition:background .1s;
+}
 
-    .logo {
-      font-family: 'Geologica', sans-serif;
-      font-size: 72px;
-      margin-bottom: 50px;
-      display: inline-flex;
-      cursor: default;
-      user-select: none;
-      color: #333333;
-    }
+.center{
+text-align:center;
+display:flex;
+flex-direction:column;
+align-items:center;
+z-index:2;
+}
 
-    .logo span {
-      display: inline-block;
-      transition: transform 0.15s ease-out;
-    }
+.logo{
+font-family:'Geologica',sans-serif;
+font-size:72px;
+margin-bottom:50px;
+display:inline-flex;
+color:#333;
+user-select:none;
+}
 
-    button {
-      padding: 16px 32px;
-      font-size: 18px;
-      font-weight: 700;
-      border-radius: 14px;
-      border: none;
-      cursor: pointer;
-      background: #00d440;
-      transition: background 0.2s;
-      margin-top: 0;
-      white-space: nowrap;
-    }
+.logo span{
+display:inline-block;
+transition:transform .15s ease-out;
+}
 
-    button:hover {
-      background: #046e24;
-    }
-  </style>
+button{
+padding:16px 32px;
+font-size:18px;
+font-weight:700;
+border-radius:14px;
+border:none;
+cursor:pointer;
+background:#00d440;
+margin:6px;
+}
+
+button:hover{
+background:#046e24;
+}
+
+input{
+width:260px;
+padding:12px;
+margin:6px;
+border-radius:10px;
+border:1px solid #ccc;
+font-size:15px;
+}
+
+.link{
+font-size:14px;
+cursor:pointer;
+margin-top:6px;
+color:#333;
+}
+
+.hidden{
+display:none;
+}
+
+</style>
 </head>
 
 <body>
-  <div class="center">
-    <div class="logo" id="logo">
-      <span>q</span><span>0</span><span>p</span><span>e</span>
-    </div>
-    <button id="loginBtn">Zaloguj się przez Google</button>
-  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<div class="center">
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
-      authDomain: "q0peee.firebaseapp.com",
-      projectId: "q0peee",
-      appId: "1:172139799914:web:ffc02c6c3b49a3fb57b113"
-    };
+<div class="logo" id="logo">
+<span>q</span><span>0</span><span>p</span><span>e</span>
+</div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+<!-- MENU -->
 
-    const loginBtn = document.getElementById("loginBtn");
-    loginBtn.onclick = () => signInWithPopup(auth, provider);
+<div id="menu">
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) return;
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        window.location.href = "app.html";
-      } else {
-        window.location.href = "signup.html";
-      }
-    });
+<button id="loginMenu">Zaloguj się</button>
+<button id="registerMenu">Zarejestruj się</button>
 
-    document.addEventListener("mousemove", e => {
-      const x = Math.round((e.clientX / window.innerWidth) * 100);
-      const y = Math.round((e.clientY / window.innerHeight) * 100);
-      document.body.style.background = `radial-gradient(circle at ${x}% ${y}%, #ffffff, #656466)`;
-    });
+</div>
 
-    const logo = document.getElementById("logo");
-    const letters = logo.querySelectorAll("span");
+<!-- LOGIN -->
 
-    document.addEventListener("mousemove", e => {
-      const rect = logo.getBoundingClientRect();
-      const padding = 100;
-      const withinX = e.clientX >= rect.left - padding && e.clientX <= rect.right + padding;
-      const withinY = e.clientY >= rect.top - padding && e.clientY <= rect.bottom + padding;
+<div id="loginBox" class="hidden">
 
-      if (withinX && withinY) {
-        letters.forEach(span => {
-          const spanRect = span.getBoundingClientRect();
-          const cx = spanRect.left + spanRect.width/2;
-          const cy = spanRect.top + spanRect.height/2;
-          const dx = cx - e.clientX;
-          const dy = cy - e.clientY;
-          const offsetX = Math.max(Math.min(dx / 25, 3), -3);
-          const offsetY = Math.max(Math.min(dy / 25, 3), -3);
-          span.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-        });
-      } else {
-        letters.forEach(span => span.style.transform = "translate(0,0)");
-      }
-    });
+<input id="loginEmail" placeholder="Email">
+<input id="loginPassword" type="password" placeholder="Hasło">
 
-    logo.addEventListener("mouseleave", () => {
-      letters.forEach(span => span.style.transform = "translate(0,0)");
-    });
-  </script>
+<button id="loginEmailBtn">Zaloguj</button>
+<button id="loginGoogleBtn">Zaloguj przez Google</button>
+
+<div class="link" id="resetPassword">Resetuj hasło</div>
+<div class="link" id="backLogin">Wróć</div>
+
+</div>
+
+<!-- REGISTER -->
+
+<div id="registerBox" class="hidden">
+
+<input id="registerEmail" placeholder="Email">
+<input id="registerPassword" type="password" placeholder="Hasło (min. 10 znaków)">
+
+<button id="registerBtn">Zapisz</button>
+<button id="registerGoogleBtn">Zaloguj przez Google</button>
+
+<div class="link" id="backRegister">Wróć</div>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import {
+getAuth,
+signInWithPopup,
+GoogleAuthProvider,
+onAuthStateChanged,
+signInWithEmailAndPassword,
+createUserWithEmailAndPassword,
+sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+getFirestore,
+doc,
+getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+
+apiKey:"AIzaSyBlUC0MjnkhcBbWeeSV2m1qA0FUthXNOCw",
+authDomain:"q0peee.firebaseapp.com",
+projectId:"q0peee",
+appId:"1:172139799914:web:ffc02c6c3b49a3fb57b113"
+
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+const provider=new GoogleAuthProvider();
+
+/* ELEMENTY */
+
+const menu=document.getElementById("menu");
+const loginBox=document.getElementById("loginBox");
+const registerBox=document.getElementById("registerBox");
+
+/* MENU BUTTONS */
+
+document.getElementById("loginMenu").onclick=()=>{
+menu.style.display="none";
+loginBox.classList.remove("hidden");
+};
+
+document.getElementById("registerMenu").onclick=()=>{
+menu.style.display="none";
+registerBox.classList.remove("hidden");
+};
+
+/* BACK BUTTONS */
+
+document.getElementById("backLogin").onclick=()=>{
+loginBox.classList.add("hidden");
+menu.style.display="block";
+};
+
+document.getElementById("backRegister").onclick=()=>{
+registerBox.classList.add("hidden");
+menu.style.display="block";
+};
+
+/* GOOGLE LOGIN */
+
+document.getElementById("loginGoogleBtn").onclick=()=>{
+signInWithPopup(auth,provider);
+};
+
+document.getElementById("registerGoogleBtn").onclick=()=>{
+signInWithPopup(auth,provider);
+};
+
+/* EMAIL LOGIN */
+
+document.getElementById("loginEmailBtn").onclick=async()=>{
+
+const email=document.getElementById("loginEmail").value;
+const pass=document.getElementById("loginPassword").value;
+
+try{
+
+await signInWithEmailAndPassword(auth,email,pass);
+
+}catch(e){
+
+alert("Błąd logowania: "+e.message);
+
+}
+
+};
+
+/* REGISTER */
+
+document.getElementById("registerBtn").onclick=async()=>{
+
+const email=document.getElementById("registerEmail").value;
+const pass=document.getElementById("registerPassword").value;
+
+if(pass.length<10){
+alert("Hasło musi mieć minimum 10 znaków");
+return;
+}
+
+try{
+
+await createUserWithEmailAndPassword(auth,email,pass);
+
+}catch(e){
+
+alert("Błąd rejestracji: "+e.message);
+
+}
+
+};
+
+/* RESET PASSWORD */
+
+document.getElementById("resetPassword").onclick=async()=>{
+
+const email=document.getElementById("loginEmail").value;
+
+if(!email){
+alert("Podaj email aby zresetować hasło");
+return;
+}
+
+try{
+
+await sendPasswordResetEmail(auth,email);
+alert("Email resetujący hasło został wysłany");
+
+}catch(e){
+
+alert("Błąd: "+e.message);
+
+}
+
+};
+
+/* CHECK USER */
+
+onAuthStateChanged(auth,async user=>{
+
+if(!user)return;
+
+const ref=doc(db,"users",user.uid);
+const snap=await getDoc(ref);
+
+if(snap.exists()){
+window.location.href="app.html";
+}else{
+window.location.href="signup.html";
+}
+
+});
+
+/* BACKGROUND ANIMATION */
+
+document.addEventListener("mousemove",e=>{
+
+const x=Math.round((e.clientX/window.innerWidth)*100);
+const y=Math.round((e.clientY/window.innerHeight)*100);
+
+document.body.style.background=
+`radial-gradient(circle at ${x}% ${y}%, #ffffff, #656466)`;
+
+});
+
+/* LOGO ANIMATION */
+
+const logo=document.getElementById("logo");
+const letters=logo.querySelectorAll("span");
+
+document.addEventListener("mousemove",e=>{
+
+const rect=logo.getBoundingClientRect();
+const padding=100;
+
+const withinX=e.clientX>=rect.left-padding && e.clientX<=rect.right+padding;
+const withinY=e.clientY>=rect.top-padding && e.clientY<=rect.bottom+padding;
+
+if(withinX && withinY){
+
+letters.forEach(span=>{
+
+const spanRect=span.getBoundingClientRect();
+
+const cx=spanRect.left+spanRect.width/2;
+const cy=spanRect.top+spanRect.height/2;
+
+const dx=cx-e.clientX;
+const dy=cy-e.clientY;
+
+const offsetX=Math.max(Math.min(dx/25,3),-3);
+const offsetY=Math.max(Math.min(dy/25,3),-3);
+
+span.style.transform=`translate(${offsetX}px,${offsetY}px)`;
+
+});
+
+}else{
+
+letters.forEach(span=>span.style.transform="translate(0,0)");
+
+}
+
+});
+
+</script>
+
 </body>
 </html>
